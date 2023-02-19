@@ -4,7 +4,7 @@ const api = require("fastify")();
 
 api.register(cors);
 
-var db = knex({
+const db = knex({
   client: "mysql",
   connection: {
     host: "127.0.0.1",
@@ -15,15 +15,15 @@ var db = knex({
 });
 
 // devuelve todos
-api.get("/products", async function (peticion, respuesta) {
-  const products = await db.from("products").select("*");
-  return products;
+api.get("/personas", async function (peticion, respuesta) {
+  const personas = await db.from("personas").select("*");
+  return personas;
 });
 
 // devuelve uno por id
-api.get("/products/:id", async function (req, res) {
+api.get("/personas/:id", async function (req, res) {
   const product = await db
-    .from("products")
+    .from("personas")
     .where({
       id: req.params.id,
     })
@@ -32,16 +32,16 @@ api.get("/products/:id", async function (req, res) {
 });
 
 // crear
-api.post("/products", async function (req, res) {
-  await db.insert(req.body).into("products");
+api.post("/personas", async function (req, res) {
+  await db.insert(req.body).into("personas");
 });
 
-api.put("/products/:id", async function (req, res) {
-  await db.from("products").where({ id: req.params.id }).update(req.body);
+api.put("/personas/:id", async function (req, res) {
+  await db.from("personas").where({ id: req.params.id }).update(req.body);
 });
 
-api.delete("/products/:id", async function (req, res) {
-  await db.from("products").where({ id: req.params.id }).delete();
+api.delete("/personas/:id", async function (req, res) {
+  await db.from("personas").where({ id: req.params.id }).delete();
 });
 
 const start = async () => {

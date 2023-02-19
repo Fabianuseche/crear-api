@@ -1,0 +1,15 @@
+{
+  "name": "api-products",
+  "scripts": {
+    "dev:client": "npm run dev --workspace cliente",
+    "dev:server": "npm run dev --workspace servidor",
+    "dev": "concurrently \"npm:dev:*\""
+  },
+  "workspaces": [
+    "cliente",
+    "servidor"
+  ],
+  "devDependencies": {
+    "concurrently": "^7.6.0"
+  }
+}
