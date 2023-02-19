@@ -1,47 +1,55 @@
-const express = require("express");
-const bodyParser = require("body-parser");
-var morgan = require("morgan");
-var cors = require("cors");
+const knex = require("knex");
+const cors = require("@fastify/cors");
+const api = require("fastify")();
 
-const app = express();
-app.use(cors());
-app.use(bodyParser.json());
-app.use(morgan("tiny"));
+api.register(cors);
 
-const items = [];
-
-// devuelve todos
-app.get("/products", function (peticion, respuesta) {
-  respuesta.json(items);
+var db = knex({
+  client: "mysql",
+  connection: {
+    host: "127.0.0.1",
+    user: "root",
+    password: "",
+    database: "fabian",
+  },
 });
 
-// devuelve uno por nombre
-app.get("/products/:nombre", function (req, res) {
-  const nombre = req.params.nombre;
-  const item = items.find((item) => item.nombre === nombre);
-  res.json(item);
+// devuelve todos
+api.get("/products", async function (peticion, respuesta) {
+  const products = await db.from("products").select("*");
+  return products;
+});
+
+// devuelve uno por id
+api.get("/products/:id", async function (req, res) {
+  const product = await db
+    .from("products")
+    .where({
+      id: req.params.id,
+    })
+    .first();
+  return product;
 });
 
 // crear
-app.post("/products", function (req, res) {
-  const item = req.body;
-  items.push(item);
-  res.json(item);
+api.post("/products", async function (req, res) {
+  await db.insert(req.body).into("products");
 });
 
-app.put("/products/:nombre", function (req, res) {
-  const nombre = req.params.nombre;
-  const itemIdx = items.findIndex((item) => item.nombre === nombre);
-  items.splice(itemIdx, 1);
-  items.push(req.body);
-  res.json(req.body);
+api.put("/products/:id", async function (req, res) {
+  await db.from("products").where({ id: req.params.id }).update(req.body);
 });
 
-app.delete("/products/:nombre", function (req, res) {
-  const nombre = req.params.nombre;
-  const itemIdx = items.findIndex((item) => item.nombre === nombre);
-  items.splice(itemIdx, 1);
-  res.send();
+api.delete("/products/:id", async function (req, res) {
+  await db.from("products").where({ id: req.params.id }).delete();
 });
 
-app.listen(3000);
+const start = async () => {
+  try {
+    await api.listen({ port: 3000 });
+  } catch (err) {
+    api.log.error(err);
+    process.exit(1);
+  }
+};
+start();
